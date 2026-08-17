@@ -43,3 +43,7 @@ refine regions="MATERIAL:gold,MATERIAL:nickel,USER:gate_oxide,USER:passivation,U
 自动生成的空 `deckbuild_log.txt` 已删除。tmux 会话已结束，当前没有 DeckBuild、VictoryMesh、ATLAS 或 xinternal 计算进程。mesh-only 不存在实际扫压，最后偏压记为 N/A。
 
 在新的网页端批准前，不缩小单个高场 contact、不增加第二类 refinement，也不运行 Id-Vg。下一步只允许根据 RUN027/RUN030 的结构对照判断完整 contact 轮廓中哪些部分造成点数膨胀。
+
+用户在 RUN030 后进一步锁定了语义：一切新增网格层都必须从金属 contact 出发。Gold/Nickel 与相邻非金属的真实接触面是唯一允许的几何种子；没有金属参与的 Al2O3/BetaGa2O3、SiO2/BetaGa2O3 等普通材料界面不得独立触发细化。所谓“双侧”只表示从同一金属接触面向金属侧和相邻非金属侧各生成少量法向层，不能解释成从非金属界面继续向外传播。
+
+网页端已驳回把标准 Conformal offset 直接叠加到 RUN027 `SIMPLEX.MINIMAL` whole-region 规则上的方案，因为本机手册只明确标准 Conformal 支持 offset，尚无证据证明这两套细化框架可等价混用。另一个独立的标准 Conformal contact-offset 网格对照已经提交审核，但网页端本轮结束时没有产出答复；没有答复不视为批准，因此未生成或运行新的 IN。
