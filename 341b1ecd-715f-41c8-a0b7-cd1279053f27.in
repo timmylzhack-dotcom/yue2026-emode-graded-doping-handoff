@@ -1,0 +1,286 @@
+# =============================================================================
+# YUE2026_R0_BASELINE
+# 600 V / 1 A enhancement-mode recessed-gate BetaGa2O3 MOSFET
+#
+# Lineage (direct template reuse, not a from-zero model):
+#   - DevEdit construction and staged BV-ready layout style:
+#     手画dev_和上述mesh建模是一样结构_BV (2).in
+#   - BetaGa2O3 material, mobility, impact, Fe-trap and solver framework:
+#     RUN096_Wang2026_nofp_Lgd9_x11_hfo2hc_SEB_1000V_Et0p8_long.in
+#   - Geometry and intentional epitaxial doping:
+#     Yue et al., IEEE EDL 2026, DOI 10.1109/LED.2026.3701514
+#
+# R0 scope:
+#   1) Build a paper-near DevEdit structure.
+#   2) Load the STR in ATLAS with BetaGa2O3 user-material regions.
+#   3) Converge initialization and a VDS=0.1 V baseline only.
+#   4) No parameter scan, no fit-driven physics changes, no SEB strike yet.
+#
+# Paper constants used directly:
+#   UID 0.10 um; n access 0.10 um @ 1e18 cm-3;
+#   n+ contact cap 0.03 um @ 7e18 cm-3;
+#   Al2O3 0.02 um; SiO2 0.30 um;
+#   LGS/LG/LGD = 1.5/2.0/10.0 um;
+#   source-field-plate drainward extension = 3.5 um;
+#   gate head / gate-FP span = 3.0 um.
+#
+# Inherited initial values where the paper is silent:
+#   UID donor background 5e15 cm-3; substrate donor background 1.5e15 cm-3;
+#   Fe acceptor trap Ec-0.8 eV, 2e18 cm-3, sigma=5e-15 cm2;
+#   5.0 um simulated substrate thickness; gate work function 5.78 eV.
+#
+# IMPORTANT MATERIAL IDENTITY:
+#   Every semiconductor region is UD1(BetaGa2O3).
+#   user.default=GaN below is only the required ATLAS numerical base for the
+#   explicit user material; it does not change the device material identity.
+#
+# Frozen user mesh constraint:
+#   No added local refinement box at gate, recess, field-plate, or high-field
+#   edges. Only region-wide layer-resolution constraints are used.
+# =============================================================================
+
+# -----------------------------------------------------------------------------
+# Stage 1: DevEdit structure derived from the existing hand-built template
+# -----------------------------------------------------------------------------
+go devedit
+
+work.area x1=0.0 y1=-0.31 x2=16.5 y2=5.23
+
+# 300 nm SiO2 passivation. The polygon follows the recessed surface.
+region id=1 name=passivation material=SiO2 \
+       points="1.0,-0.29 14.5,-0.29 14.5,0.01 \
+               4.5,0.01 4.5,0.11 2.5,0.11 \
+               2.5,0.01 1.0,0.01 1.0,-0.29"
+
+# 20 nm Al2O3 on the left access, recessed gate bottom, and right access.
+region id=2 name=al2o3_left material=Al2O3 \
+       points="1.0,0.01 2.5,0.01 2.5,0.03 1.0,0.03 1.0,0.01"
+region id=3 name=al2o3_gate material=Al2O3 \
+       points="2.5,0.11 4.5,0.11 4.5,0.13 2.5,0.13 2.5,0.11"
+region id=4 name=al2o3_right material=Al2O3 \
+       points="4.5,0.01 14.5,0.01 14.5,0.03 4.5,0.03 4.5,0.01"
+
+# 30 nm n+ contact caps. Paper value: 7e18 cm-3.
+region id=5 name=source_nplus material="UD1(BetaGa2O3)" \
+       points="0.0,0.00 1.0,0.00 1.0,0.03 0.0,0.03 0.0,0.00"
+impurity id=1 region.id=5 imp=Donors peak.value=7.0e18 \
+         ref.value=1.0e12 comb.func=Multiply
+
+region id=6 name=drain_nplus material="UD1(BetaGa2O3)" \
+       points="14.5,0.00 16.5,0.00 16.5,0.03 14.5,0.03 14.5,0.00"
+impurity id=2 region.id=6 imp=Donors peak.value=7.0e18 \
+         ref.value=1.0e12 comb.func=Multiply
+
+# 100 nm n-type access layer, removed completely below the recessed gate.
+region id=7 name=access_left material="UD1(BetaGa2O3)" \
+       points="0.0,0.03 2.5,0.03 2.5,0.13 0.0,0.13 0.0,0.03"
+impurity id=3 region.id=7 imp=Donors peak.value=1.0e18 \
+         ref.value=1.0e12 comb.func=Multiply
+
+region id=8 name=access_right material="UD1(BetaGa2O3)" \
+       points="4.5,0.03 16.5,0.03 16.5,0.13 4.5,0.13 4.5,0.03"
+impurity id=4 region.id=8 imp=Donors peak.value=1.0e18 \
+         ref.value=1.0e12 comb.func=Multiply
+
+# 100 nm UID layer preserved under the gate. Background is inherited, not a
+# paper-reported value.
+region id=9 name=uid_channel material="UD1(BetaGa2O3)" \
+       points="0.0,0.13 16.5,0.13 16.5,0.23 0.0,0.23 0.0,0.13"
+impurity id=5 region.id=9 imp=Donors peak.value=5.0e15 \
+         ref.value=1.0e12 comb.func=Multiply
+
+# Fe-doped semi-insulating substrate. Simulated thickness and donor background
+# are inherited initial values; the Fe trap is applied in ATLAS below.
+region id=10 name=fe_substrate material="UD1(BetaGa2O3)" \
+       points="0.0,0.23 16.5,0.23 16.5,5.23 0.0,5.23 0.0,0.23"
+impurity id=6 region.id=10 imp=Donors peak.value=1.5e15 \
+         ref.value=1.0e12 comb.func=Multiply
+
+# Paper metal stacks are Ti/Au for source/drain/source FP and Ni/Au for gate.
+# DevEdit uses the leading conductor material; contact work functions are set
+# explicitly in ATLAS.
+region id=11 name=source material=Titanium elec.id=1 \
+       points="0.0,-0.29 1.0,-0.29 1.0,0.00 0.0,0.00 0.0,-0.29"
+region id=12 name=source material=Titanium elec.id=1 \
+       points="1.0,-0.29 4.5,-0.29"
+
+region id=13 name=drain material=Titanium elec.id=2 \
+       points="14.5,-0.29 16.5,-0.29 16.5,0.00 14.5,0.00 14.5,-0.29"
+
+# Recessed gate and a 3 um gate-head/field-plate segment share elec.id=3.
+region id=14 name=gate material=Nickel elec.id=3 \
+       points="2.5,0.11 4.5,0.11"
+region id=15 name=gate material=Nickel elec.id=3 \
+       points="2.5,0.01 5.5,0.01"
+
+# Region-wide mesh only; no edge-sensitive local refinement boxes.
+base.mesh height=0.60 width=0.80
+bound.cond !apply max.slope=30 max.ratio=50 rnd.unit=0.001 \
+           line.straightening=0 align.points when=automatic
+imp.refine min.spacing=0.020
+constr.mesh max.angle=90 max.ratio=40 \
+            max.height=0.60 max.width=0.80 \
+            min.height=0.001 min.width=0.001
+constr.mesh reg=1 max.height=0.075 max.width=0.50
+constr.mesh reg=2 max.height=0.005 max.width=0.50
+constr.mesh reg=3 max.height=0.005 max.width=0.50
+constr.mesh reg=4 max.height=0.005 max.width=0.50
+constr.mesh reg=5 max.height=0.015 max.width=0.50
+constr.mesh reg=6 max.height=0.015 max.width=0.50
+constr.mesh reg=7 max.height=0.025 max.width=0.50
+constr.mesh reg=8 max.height=0.025 max.width=0.50
+constr.mesh reg=9 max.height=0.025 max.width=0.50
+constr.mesh reg=10 max.height=0.50 max.width=0.80
+
+mesh mode=MeshBuild
+structure outfile="YUE2026_R0_mesh.str"
+
+# -----------------------------------------------------------------------------
+# Stage 2: ATLAS baseline using the RUN096 BetaGa2O3 physics framework
+# -----------------------------------------------------------------------------
+go atlas simflags="-V 5.40.0.R -P 4"
+mesh infile="YUE2026_R0_mesh.str"
+
+# Explicit BetaGa2O3 user-material parameters inherited from RUN096.
+material region=5 user.group=semiconductor user.default=GaN \
+         affinity=4.00 eg300=4.85 egalph=0 egbeta=0 \
+         permittivity=10.2 nc300=3.718e18 nv300=6.44e20 \
+         taun0=1.2e-8 taup0=1.2e-8 \
+         edb=0.06 gcb=2.0 eab=1.0 gvb=4.0 \
+         augn=2.8e-31 augp=9.9e-32 \
+         tcon.const tc.const=0.27 \
+         hc.std hc.a=3.332 hc.b=0 hc.c=0 hc.d=0
+material region=6 user.group=semiconductor user.default=GaN \
+         affinity=4.00 eg300=4.85 egalph=0 egbeta=0 \
+         permittivity=10.2 nc300=3.718e18 nv300=6.44e20 \
+         taun0=1.2e-8 taup0=1.2e-8 \
+         edb=0.06 gcb=2.0 eab=1.0 gvb=4.0 \
+         augn=2.8e-31 augp=9.9e-32 \
+         tcon.const tc.const=0.27 \
+         hc.std hc.a=3.332 hc.b=0 hc.c=0 hc.d=0
+material region=7 user.group=semiconductor user.default=GaN \
+         affinity=4.00 eg300=4.85 egalph=0 egbeta=0 \
+         permittivity=10.2 nc300=3.718e18 nv300=6.44e20 \
+         taun0=1.2e-8 taup0=1.2e-8 \
+         edb=0.06 gcb=2.0 eab=1.0 gvb=4.0 \
+         augn=2.8e-31 augp=9.9e-32 \
+         tcon.const tc.const=0.27 \
+         hc.std hc.a=3.332 hc.b=0 hc.c=0 hc.d=0
+material region=8 user.group=semiconductor user.default=GaN \
+         affinity=4.00 eg300=4.85 egalph=0 egbeta=0 \
+         permittivity=10.2 nc300=3.718e18 nv300=6.44e20 \
+         taun0=1.2e-8 taup0=1.2e-8 \
+         edb=0.06 gcb=2.0 eab=1.0 gvb=4.0 \
+         augn=2.8e-31 augp=9.9e-32 \
+         tcon.const tc.const=0.27 \
+         hc.std hc.a=3.332 hc.b=0 hc.c=0 hc.d=0
+material region=9 user.group=semiconductor user.default=GaN \
+         affinity=4.00 eg300=4.85 egalph=0 egbeta=0 \
+         permittivity=10.2 nc300=3.718e18 nv300=6.44e20 \
+         taun0=1.2e-8 taup0=1.2e-8 \
+         edb=0.06 gcb=2.0 eab=1.0 gvb=4.0 \
+         augn=2.8e-31 augp=9.9e-32 \
+         tcon.const tc.const=0.27 \
+         hc.std hc.a=3.332 hc.b=0 hc.c=0 hc.d=0
+material region=10 user.group=semiconductor user.default=GaN \
+         affinity=4.00 eg300=4.85 egalph=0 egbeta=0 \
+         permittivity=10.2 nc300=3.718e18 nv300=6.44e20 \
+         taun0=1.2e-8 taup0=1.2e-8 \
+         edb=0.06 gcb=2.0 eab=1.0 gvb=4.0 \
+         augn=2.8e-31 augp=9.9e-32 \
+         tcon.const tc.const=0.27 \
+         hc.std hc.a=3.332 hc.b=0 hc.c=0 hc.d=0
+
+material region=1 permittivity=3.9 tcon.const tc.const=0.014
+material region=2 permittivity=9.0 tcon.const tc.const=0.33
+material region=3 permittivity=9.0 tcon.const tc.const=0.33
+material region=4 permittivity=9.0 tcon.const tc.const=0.33
+
+# RUN096 mobility model, written explicitly for every BetaGa2O3 region.
+mobility region=5 mu1n.caug=10 mu2n.caug=118.0 \
+         ncritn.caug=2e17 deltan.caug=1.0 \
+         alphan.caug=0 betan.caug=0 gamman.caug=0 \
+         mu1p.caug=1e-6 mu2p.caug=1.3 \
+         ncritp.caug=1e17 deltap.caug=1.0 \
+         alphap.caug=0 betap.caug=0 gammap.caug=0 \
+         vsatn=2.0e7 vsatp=2.0e7 betan=7.52 betap=7.52
+mobility region=6 mu1n.caug=10 mu2n.caug=118.0 \
+         ncritn.caug=2e17 deltan.caug=1.0 \
+         alphan.caug=0 betan.caug=0 gamman.caug=0 \
+         mu1p.caug=1e-6 mu2p.caug=1.3 \
+         ncritp.caug=1e17 deltap.caug=1.0 \
+         alphap.caug=0 betap.caug=0 gammap.caug=0 \
+         vsatn=2.0e7 vsatp=2.0e7 betan=7.52 betap=7.52
+mobility region=7 mu1n.caug=10 mu2n.caug=118.0 \
+         ncritn.caug=2e17 deltan.caug=1.0 \
+         alphan.caug=0 betan.caug=0 gamman.caug=0 \
+         mu1p.caug=1e-6 mu2p.caug=1.3 \
+         ncritp.caug=1e17 deltap.caug=1.0 \
+         alphap.caug=0 betap.caug=0 gammap.caug=0 \
+         vsatn=2.0e7 vsatp=2.0e7 betan=7.52 betap=7.52
+mobility region=8 mu1n.caug=10 mu2n.caug=118.0 \
+         ncritn.caug=2e17 deltan.caug=1.0 \
+         alphan.caug=0 betan.caug=0 gamman.caug=0 \
+         mu1p.caug=1e-6 mu2p.caug=1.3 \
+         ncritp.caug=1e17 deltap.caug=1.0 \
+         alphap.caug=0 betap.caug=0 gammap.caug=0 \
+         vsatn=2.0e7 vsatp=2.0e7 betan=7.52 betap=7.52
+mobility region=9 mu1n.caug=10 mu2n.caug=118.0 \
+         ncritn.caug=2e17 deltan.caug=1.0 \
+         alphan.caug=0 betan.caug=0 gamman.caug=0 \
+         mu1p.caug=1e-6 mu2p.caug=1.3 \
+         ncritp.caug=1e17 deltap.caug=1.0 \
+         alphap.caug=0 betap.caug=0 gammap.caug=0 \
+         vsatn=2.0e7 vsatp=2.0e7 betan=7.52 betap=7.52
+mobility region=10 mu1n.caug=10 mu2n.caug=118.0 \
+         ncritn.caug=2e17 deltan.caug=1.0 \
+         alphan.caug=0 betan.caug=0 gamman.caug=0 \
+         mu1p.caug=1e-6 mu2p.caug=1.3 \
+         ncritp.caug=1e17 deltap.caug=1.0 \
+         alphap.caug=0 betap.caug=0 gammap.caug=0 \
+         vsatn=2.0e7 vsatp=2.0e7 betan=7.52 betap=7.52
+
+# RUN096 impact model retained unchanged for later BV/SEB extension.
+impact region=5 selb an1=2.16e6 an2=2.16e6 bn1=1.77e7 bn2=1.77e7 \
+       ap1=2.16e6 ap2=2.16e6 bp1=1.77e7 bp2=1.77e7 \
+       betan=1.0 betap=1.0 egran=4.0e5
+impact region=6 selb an1=2.16e6 an2=2.16e6 bn1=1.77e7 bn2=1.77e7 \
+       ap1=2.16e6 ap2=2.16e6 bp1=1.77e7 bp2=1.77e7 \
+       betan=1.0 betap=1.0 egran=4.0e5
+impact region=7 selb an1=2.16e6 an2=2.16e6 bn1=1.77e7 bn2=1.77e7 \
+       ap1=2.16e6 ap2=2.16e6 bp1=1.77e7 bp2=1.77e7 \
+       betan=1.0 betap=1.0 egran=4.0e5
+impact region=8 selb an1=2.16e6 an2=2.16e6 bn1=1.77e7 bn2=1.77e7 \
+       ap1=2.16e6 ap2=2.16e6 bp1=1.77e7 bp2=1.77e7 \
+       betan=1.0 betap=1.0 egran=4.0e5
+impact region=9 selb an1=2.16e6 an2=2.16e6 bn1=1.77e7 bn2=1.77e7 \
+       ap1=2.16e6 ap2=2.16e6 bp1=1.77e7 bp2=1.77e7 \
+       betan=1.0 betap=1.0 egran=4.0e5
+impact region=10 selb an1=2.16e6 an2=2.16e6 bn1=1.77e7 bn2=1.77e7 \
+       ap1=2.16e6 ap2=2.16e6 bp1=1.77e7 bp2=1.77e7 \
+       betan=1.0 betap=1.0 egran=4.0e5
+
+trap region=10 acceptor e.level=0.8 density=2.0e18 \
+     degen.fac=1 sign=5.0e-15 sigp=5.0e-15
+
+contact name=source workfunc=4.00
+contact name=drain workfunc=4.00
+contact name=gate workfunc=5.78
+
+models analytic fldmob srh auger fermi incomplete print
+method newton trap maxtraps=10 climit=1e-4 itlimit=50
+output e.field impact flowlines e.mobility h.mobility band.param \
+       ex.field ey.field jx.electron jy.electron \
+       jx.hole jy.hole jx.total jy.total
+
+solve init
+save outfile="YUE2026_R0_init.str"
+
+log outfile="YUE2026_R0_static.log"
+solve vgate=0 name=gate
+solve vdrain=0.01 name=drain
+solve vdrain=0.10 name=drain previous
+save outfile="YUE2026_R0_vd0p1.str"
+log off
+
+quit
