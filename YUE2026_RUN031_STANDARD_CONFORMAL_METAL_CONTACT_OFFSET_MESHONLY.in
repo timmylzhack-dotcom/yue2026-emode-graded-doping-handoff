@@ -1,0 +1,121 @@
+# =============================================================================
+# YUE2026_RUN031_STANDARD_CONFORMAL_METAL_CONTACT_OFFSET_MESHONLY
+# User-approved independent standard-Conformal mesh-only comparison.
+# Every offset layer starts from a real Gold/Nickel contact boundary.
+# No SIMPLEX.MINIMAL, region MAX.SIZE, interface-distance, box, corner or solve.
+# =============================================================================
+
+go devedit
+
+work.area x1=-0.30 y1=-1.05 x2=19.80 y2=5.23
+
+# BetaGa2O3 epitaxy.
+region id=5 name=source_nplus material="UD1(BetaGa2O3)" \
+       points="0.0,0.00 3.0,0.00 3.0,0.03 0.0,0.03 0.0,0.00"
+impurity id=1 region.id=5 imp=Donors peak.value=7.0e18 \
+         ref.value=1.0e12 comb.func=Multiply
+
+region id=6 name=drain_nplus material="UD1(BetaGa2O3)" \
+       points="16.5,0.00 19.5,0.00 19.5,0.03 16.5,0.03 16.5,0.00"
+impurity id=2 region.id=6 imp=Donors peak.value=7.0e18 \
+         ref.value=1.0e12 comb.func=Multiply
+
+region id=7 name=access_left material="UD1(BetaGa2O3)" \
+       points="0.0,0.03 4.5,0.03 4.5,0.13 0.0,0.13 0.0,0.03"
+impurity id=3 region.id=7 imp=Donors peak.value=1.0e18 \
+         ref.value=1.0e12 comb.func=Multiply
+
+region id=8 name=access_right material="UD1(BetaGa2O3)" \
+       points="6.5,0.03 19.5,0.03 19.5,0.13 6.5,0.13 6.5,0.03"
+impurity id=4 region.id=8 imp=Donors peak.value=1.0e18 \
+         ref.value=1.0e12 comb.func=Multiply
+
+region id=9 name=uid_channel material="UD1(BetaGa2O3)" \
+       points="0.0,0.13 19.5,0.13 19.5,0.23 0.0,0.23 0.0,0.13"
+impurity id=5 region.id=9 imp=Donors peak.value=5.0e15 \
+         ref.value=1.0e12 comb.func=Multiply
+
+region id=10 name=fe_substrate material="UD1(BetaGa2O3)" \
+       points="0.0,0.23 19.5,0.23 19.5,5.23 0.0,5.23 0.0,0.23"
+impurity id=6 region.id=10 imp=Donors peak.value=1.5e15 \
+         ref.value=1.0e12 comb.func=Multiply
+
+# Paper metal totals: S/D Ti/Au 60/180 nm -> 0.24 um Gold 2-D equivalent.
+deposit material=Gold thickness=0.24 start=0.00 end=3.00 \
+        region.id=81 region.name=source elec.id=1 automatic.join
+deposit material=Gold thickness=0.24 start=16.50 end=19.50 \
+        region.id=82 region.name=drain elec.id=2 automatic.join
+
+# Paper Al2O3 thickness: 20 nm. One continuous deposition.
+deposit material=Al2O3 thickness=0.02 start=3.00 end=16.50 \
+        region.id=83 region.name=gate_oxide automatic.join
+
+# Paper gate Ni/Au 50/150 nm -> 0.20 um Nickel 2-D equivalent.
+deposit material=Nickel thickness=0.20 start=4.00 end=7.00 \
+        region.id=84 region.name=gate elec.id=3 automatic.join
+
+# Paper PECVD SiO2 passivation: 300 nm.
+deposit material=SiO2 thickness=0.30 start=0.40 end=19.49 \
+        region.id=85 region.name=passivation automatic.join
+
+# Source via engineering window retained from validated RUN010.
+region id=90 name=via_cut material=Silicon \
+       points="0.40,-1.00 1.60,-1.00 1.60,-0.24 \
+               0.40,-0.24 0.40,-1.00"
+region delete id=90
+
+# Source FP remains a distinct Gold region but is electrically source.
+deposit material=Gold thickness=0.24 start=0.00 end=10.00 \
+        region.id=86 region.name=source_fp elec.id=1
+
+# DevEdit is used only to reproduce the frozen geometry and its existing grid.
+base.mesh height=0.60 width=0.50
+bound.cond !apply max.slope=30 max.ratio=50 rnd.unit=0.001 \
+           line.straightening=0 align.points when=automatic
+constr.mesh max.angle=90 max.ratio=50 \
+            max.height=0.60 max.width=0.50 \
+            min.height=0.001 min.width=0.001
+constr.mesh reg=5 max.height=0.015 max.width=0.30
+constr.mesh reg=6 max.height=0.015 max.width=0.30
+constr.mesh reg=7 max.height=0.025 max.width=0.40
+constr.mesh reg=8 max.height=0.025 max.width=0.40
+constr.mesh reg=9 max.height=0.025 max.width=0.40
+constr.mesh reg=10 max.height=0.50 max.width=0.60
+
+mesh mode=MeshBuild
+structure outfile="YUE2026_RUN031_STANDARD_CONFORMAL_METAL_CONTACT_OFFSET_devedit_raw.str"
+
+# =============================================================================
+# Victory Mesh 1.12.0.R: independent standard-Conformal offset comparison.
+# No SPACING override: use the Cartesian grid inherited from the input STR.
+# =============================================================================
+
+go victorymesh simflags="-P 4"
+
+load in="YUE2026_RUN031_STANDARD_CONFORMAL_METAL_CONTACT_OFFSET_devedit_raw.str"
+info
+
+remesh conformal
+
+# Metal-side receiver. The shared Gold/Nickel-to-nonmetal contact is the seed.
+refine interface.regions="MATERIAL:gold,MATERIAL:nickel" \
+       other.interface.regions="USER:gate_oxide,USER:passivation,USER:source_nplus,USER:drain_nplus,USER:access_left,USER:access_right,USER:uid_channel" \
+       delta=0.005 num.intervals=2 multiplier=1
+
+# Nonmetal-side receiver, mirrored across the same metal contact boundary.
+# This does not seed any interface that lacks Gold or Nickel.
+refine interface.regions="USER:gate_oxide,USER:passivation,USER:source_nplus,USER:drain_nplus,USER:access_left,USER:access_right,USER:uid_channel" \
+       other.interface.regions="MATERIAL:gold,MATERIAL:nickel" \
+       delta=0.005 num.intervals=2 multiplier=1
+
+info
+info fields="*"
+save out="YUE2026_RUN031_STANDARD_CONFORMAL_METAL_CONTACT_OFFSET_vmesh.str"
+
+# Atlas load-only quality report. No models, contacts, Qf or solve.
+go atlas simflags="-V 5.40.0.R -P 4"
+mesh infile="YUE2026_RUN031_STANDARD_CONFORMAL_METAL_CONTACT_OFFSET_vmesh.str" width=20
+material region=1 user.group=semiconductor user.default=GaN \
+         affinity=4.00 eg300=4.85 permittivity=10.2
+quit
+

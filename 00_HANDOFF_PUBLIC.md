@@ -40,6 +40,8 @@
 
 RUN030 使用 interface-distance 做完整金属 contact 双侧短程渐变，虽然结构、区域和电极保持完整，但产生43963个节点并越过35000节点硬停止线，因此没有运行 Id–Vg。后续候选方向只能是标准 Conformal 的短法向 offset 网格对照；它不能与 RUN027 的 `SIMPLEX.MINIMAL` whole-region 规则未经验证地混用。该候选在网页端明确批准前不得运行。
 
+用户随后明确授权独立的标准 Conformal contact-offset mesh-only 对照。RUN031–RUN033 用于解决标准 Conformal 要求每个接收 region 只能作为单一 group 的语法约束，均在生成最终网格前停止。RUN034 成功生成并被 ATLAS 载入，只有3200 nodes、6173 triangles，但钝角比例为12.7329%，并将原逻辑结构拆成29个 region 子区和9个 electrode 子区，因而同时触发网格质量和结构不变量硬停止。没有运行 Id–Vg，正式物理基线仍为 RUN023 DevEdit；RUN034 只能作为失败的网格算法对照，不能用于拟合。
+
 ## 请网页端复核
 
 请只依据本公开交接和论文信息回答以下问题，不建议从零重写器件：
