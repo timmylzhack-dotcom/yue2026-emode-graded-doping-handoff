@@ -1,0 +1,154 @@
+# =============================================================================
+# YUE2026_RUN027_VICTORYMESH_DENSE_IDVG_QF_NEG4E12
+# Dense active-region Victory Mesh grid-independence counterpart of RUN023/RUN025.
+# The only change is the input STR: RUN026 dense active-region conformal-minimal output.
+# Geometry, BetaGa2O3 regions, doping, electrodes, Qf, physics and bias are frozen.
+# This is a low-voltage VDS=1 V Id-Vg run, not BV or SEB.
+# =============================================================================
+
+go atlas simflags="-V 5.40.0.R -P 4"
+mesh infile="YUE2026_RUN027_VICTORYMESH_DENSE_IDVG_QF_NEG4E12_vmesh.str" width=20
+
+material region=1 user.group=semiconductor user.default=GaN \
+         affinity=4.00 eg300=4.85 egalph=0 egbeta=0 \
+         permittivity=10.2 nc300=3.718e18 nv300=6.44e20 \
+         taun0=1.2e-8 taup0=1.2e-8 \
+         edb=0.06 gcb=2.0 eab=1.0 gvb=4.0 \
+         augn=2.8e-31 augp=9.9e-32 \
+         tcon.const tc.const=0.27 \
+         hc.std hc.a=3.332 hc.b=0 hc.c=0 hc.d=0
+material region=2 user.group=semiconductor user.default=GaN \
+         affinity=4.00 eg300=4.85 egalph=0 egbeta=0 \
+         permittivity=10.2 nc300=3.718e18 nv300=6.44e20 \
+         taun0=1.2e-8 taup0=1.2e-8 \
+         edb=0.06 gcb=2.0 eab=1.0 gvb=4.0 \
+         augn=2.8e-31 augp=9.9e-32 \
+         tcon.const tc.const=0.27 \
+         hc.std hc.a=3.332 hc.b=0 hc.c=0 hc.d=0
+material region=3 user.group=semiconductor user.default=GaN \
+         affinity=4.00 eg300=4.85 egalph=0 egbeta=0 \
+         permittivity=10.2 nc300=3.718e18 nv300=6.44e20 \
+         taun0=1.2e-8 taup0=1.2e-8 \
+         edb=0.06 gcb=2.0 eab=1.0 gvb=4.0 \
+         augn=2.8e-31 augp=9.9e-32 \
+         tcon.const tc.const=0.27 \
+         hc.std hc.a=3.332 hc.b=0 hc.c=0 hc.d=0
+material region=4 user.group=semiconductor user.default=GaN \
+         affinity=4.00 eg300=4.85 egalph=0 egbeta=0 \
+         permittivity=10.2 nc300=3.718e18 nv300=6.44e20 \
+         taun0=1.2e-8 taup0=1.2e-8 \
+         edb=0.06 gcb=2.0 eab=1.0 gvb=4.0 \
+         augn=2.8e-31 augp=9.9e-32 \
+         tcon.const tc.const=0.27 \
+         hc.std hc.a=3.332 hc.b=0 hc.c=0 hc.d=0
+material region=5 user.group=semiconductor user.default=GaN \
+         affinity=4.00 eg300=4.85 egalph=0 egbeta=0 \
+         permittivity=10.2 nc300=3.718e18 nv300=6.44e20 \
+         taun0=1.2e-8 taup0=1.2e-8 \
+         edb=0.06 gcb=2.0 eab=1.0 gvb=4.0 \
+         augn=2.8e-31 augp=9.9e-32 \
+         tcon.const tc.const=0.27 \
+         hc.std hc.a=3.332 hc.b=0 hc.c=0 hc.d=0
+material region=6 user.group=semiconductor user.default=GaN \
+         affinity=4.00 eg300=4.85 egalph=0 egbeta=0 \
+         permittivity=10.2 nc300=3.718e18 nv300=6.44e20 \
+         taun0=1.2e-8 taup0=1.2e-8 \
+         edb=0.06 gcb=2.0 eab=1.0 gvb=4.0 \
+         augn=2.8e-31 augp=9.9e-32 \
+         tcon.const tc.const=0.27 \
+         hc.std hc.a=3.332 hc.b=0 hc.c=0 hc.d=0
+
+material region=8 permittivity=9.0 tcon.const tc.const=0.33
+material region=10 permittivity=3.9 tcon.const tc.const=0.014
+
+mobility region=1 mu1n.caug=10 mu2n.caug=118.0 \
+         ncritn.caug=2e17 deltan.caug=1.0 \
+         alphan.caug=0 betan.caug=0 gamman.caug=0 \
+         mu1p.caug=1e-6 mu2p.caug=1.3 \
+         ncritp.caug=1e17 deltap.caug=1.0 \
+         alphap.caug=0 betap.caug=0 gammap.caug=0 \
+         vsatn=2.0e7 vsatp=2.0e7 betan=7.52 betap=7.52
+mobility region=2 mu1n.caug=10 mu2n.caug=118.0 \
+         ncritn.caug=2e17 deltan.caug=1.0 \
+         alphan.caug=0 betan.caug=0 gamman.caug=0 \
+         mu1p.caug=1e-6 mu2p.caug=1.3 \
+         ncritp.caug=1e17 deltap.caug=1.0 \
+         alphap.caug=0 betap.caug=0 gammap.caug=0 \
+         vsatn=2.0e7 vsatp=2.0e7 betan=7.52 betap=7.52
+mobility region=3 mu1n.caug=10 mu2n.caug=118.0 \
+         ncritn.caug=2e17 deltan.caug=1.0 \
+         alphan.caug=0 betan.caug=0 gamman.caug=0 \
+         mu1p.caug=1e-6 mu2p.caug=1.3 \
+         ncritp.caug=1e17 deltap.caug=1.0 \
+         alphap.caug=0 betap.caug=0 gammap.caug=0 \
+         vsatn=2.0e7 vsatp=2.0e7 betan=7.52 betap=7.52
+mobility region=4 mu1n.caug=10 mu2n.caug=118.0 \
+         ncritn.caug=2e17 deltan.caug=1.0 \
+         alphan.caug=0 betan.caug=0 gamman.caug=0 \
+         mu1p.caug=1e-6 mu2p.caug=1.3 \
+         ncritp.caug=1e17 deltap.caug=1.0 \
+         alphap.caug=0 betap.caug=0 gammap.caug=0 \
+         vsatn=2.0e7 vsatp=2.0e7 betan=7.52 betap=7.52
+mobility region=5 mu1n.caug=10 mu2n.caug=118.0 \
+         ncritn.caug=2e17 deltan.caug=1.0 \
+         alphan.caug=0 betan.caug=0 gamman.caug=0 \
+         mu1p.caug=1e-6 mu2p.caug=1.3 \
+         ncritp.caug=1e17 deltap.caug=1.0 \
+         alphap.caug=0 betap.caug=0 gammap.caug=0 \
+         vsatn=2.0e7 vsatp=2.0e7 betan=7.52 betap=7.52
+mobility region=6 mu1n.caug=10 mu2n.caug=118.0 \
+         ncritn.caug=2e17 deltan.caug=1.0 \
+         alphan.caug=0 betan.caug=0 gamman.caug=0 \
+         mu1p.caug=1e-6 mu2p.caug=1.3 \
+         ncritp.caug=1e17 deltap.caug=1.0 \
+         alphap.caug=0 betap.caug=0 gammap.caug=0 \
+         vsatn=2.0e7 vsatp=2.0e7 betan=7.52 betap=7.52
+
+# RUN096 Fe-related substrate trap; unchanged.
+trap region=6 acceptor e.level=0.8 density=2.0e18 \
+     degen.fac=1 sign=5.0e-15 sigp=5.0e-15
+
+# DevEdit retains source_fp as the electrode-1 name after the final deposit.
+# It is the physical Source terminal because both use elec.id=1.
+contact name=source_fp workfunc=4.00
+contact name=drain workfunc=4.00
+contact name=gate workfunc=5.78
+
+# Negative fixed charge only on the horizontal Al2O3/UID-BetaGa2O3 recess bottom.
+# Slightly inset x bounds exclude the two vertical trench sidewalls.
+interface qf=-4.0e12 x.min=4.5001 x.max=6.4999 y.min=0.129 y.max=0.131
+
+models analytic fldmob srh auger fermi incomplete print
+method newton trap maxtraps=10 climit=1e-4 itlimit=50
+output e.field flowlines e.mobility h.mobility band.param con.band val.band \
+       ex.field ey.field jx.electron jy.electron \
+       jx.hole jy.hole jx.total jy.total
+
+solve init
+save outfile="YUE2026_RUN027_VICTORYMESH_DENSE_IDVG_QF_NEG4E12_init.str"
+
+solve vgate=0 name=gate
+solve vdrain=0.01 name=drain
+solve vdrain=0.10 name=drain previous
+solve vdrain=0.50 name=drain previous
+solve vdrain=1.00 name=drain previous
+save outfile="YUE2026_RUN027_VICTORYMESH_DENSE_IDVG_QF_NEG4E12_vd1_vg0.str"
+
+# Paper small-periphery transfer condition: Wch=20 um and VDS=1 V.
+# Diagnostic saves at the simulated 1 mA/mm crossing and paper VTH target.
+log outfile="YUE2026_RUN027_VICTORYMESH_DENSE_IDVG_QF_NEG4E12.log"
+solve vgate=0 name=gate
+solve vstep=0.10 vfinal=3.10 name=gate
+save outfile="YUE2026_RUN027_VICTORYMESH_DENSE_IDVG_QF_NEG4E12_vd1_vg3p1.str"
+solve vstep=0.10 vfinal=9.00 name=gate
+save outfile="YUE2026_RUN027_VICTORYMESH_DENSE_IDVG_QF_NEG4E12_vd1_vg9.str"
+solve vstep=0.10 vfinal=12.0 name=gate
+save outfile="YUE2026_RUN027_VICTORYMESH_DENSE_IDVG_QF_NEG4E12_vd1_vg12.str"
+log off
+
+quit
+
+
+
+
+

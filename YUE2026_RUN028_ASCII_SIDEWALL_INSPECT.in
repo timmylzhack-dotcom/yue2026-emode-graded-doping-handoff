@@ -1,0 +1,6 @@
+# Read-only conversion of the completed RUN028 VictoryMesh STR.
+# No remesh, refinement, geometry change, physics or solve.
+go victorymesh
+load in="YUE2026_RUN028_VICTORYMESH_AL2O3_ISOTROPIC_vmesh.str"
+save out="YUE2026_RUN028_VICTORYMESH_AL2O3_ISOTROPIC_vmesh_ascii.str" ascii
+quit
